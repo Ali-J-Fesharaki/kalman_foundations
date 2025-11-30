@@ -23,6 +23,7 @@ _codeql_detected_source_root
 *.out
 *.app
 kalman_demo
+kalman_gui
 
 # CMake generated files
 CMakeCache.txt
