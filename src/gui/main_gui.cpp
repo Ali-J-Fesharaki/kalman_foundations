@@ -41,15 +41,15 @@
  * @brief Holds the complete state of the Kalman Filter simulation
  */
 struct SimulationState {
-    // System parameters
-    double dt = 1.0;
-    double process_noise_intensity = 0.1;
-    double measurement_noise_variance = 1.0;
+    // System parameters (float for ImGui compatibility)
+    float dt = 1.0f;
+    float process_noise_intensity = 0.1f;
+    float measurement_noise_variance = 1.0f;
     
-    // Initial conditions
-    double initial_position = 0.0;
-    double initial_velocity = 1.0;
-    double initial_covariance = 1.0;
+    // Initial conditions (float for ImGui compatibility)
+    float initial_position = 0.0f;
+    float initial_velocity = 1.0f;
+    float initial_covariance = 1.0f;
     
     // Simulation control
     int current_step = 0;
@@ -262,16 +262,16 @@ void renderMainWindow(SimulationState& state) {
         ImGui::TextWrapped("Adjust these parameters to see how they affect filter performance:");
         
         bool changed = false;
-        changed |= ImGui::SliderFloat("Time Step (dt)", (float*)&state.dt, 0.1f, 2.0f);
-        changed |= ImGui::SliderFloat("Process Noise (q)", (float*)&state.process_noise_intensity, 0.01f, 1.0f);
-        changed |= ImGui::SliderFloat("Measurement Noise (R)", (float*)&state.measurement_noise_variance, 0.1f, 5.0f);
+        changed |= ImGui::SliderFloat("Time Step (dt)", &state.dt, 0.1f, 2.0f);
+        changed |= ImGui::SliderFloat("Process Noise (q)", &state.process_noise_intensity, 0.01f, 1.0f);
+        changed |= ImGui::SliderFloat("Measurement Noise (R)", &state.measurement_noise_variance, 0.1f, 5.0f);
         changed |= ImGui::SliderInt("Max Steps", &state.max_steps, 5, 50);
         
         ImGui::Separator();
         ImGui::Text("Initial Conditions:");
-        changed |= ImGui::SliderFloat("Initial Position", (float*)&state.initial_position, -5.0f, 5.0f);
-        changed |= ImGui::SliderFloat("Initial Velocity", (float*)&state.initial_velocity, 0.0f, 3.0f);
-        changed |= ImGui::SliderFloat("Initial Uncertainty", (float*)&state.initial_covariance, 0.1f, 5.0f);
+        changed |= ImGui::SliderFloat("Initial Position", &state.initial_position, -5.0f, 5.0f);
+        changed |= ImGui::SliderFloat("Initial Velocity", &state.initial_velocity, 0.0f, 3.0f);
+        changed |= ImGui::SliderFloat("Initial Uncertainty", &state.initial_covariance, 0.1f, 5.0f);
         
         if (changed && !state.running) {
             // Optionally auto-reinitialize when parameters change
@@ -404,8 +404,10 @@ void renderEducationalWindow() {
                 "Key Insight: The update step is the product of two Gaussian "
                 "distributions (Prior x Likelihood).\n\n"
                 "Bayes' Rule:\n"
-                "  P(x|z) = P(z|x) * P(x)\n"
-                "  posterior = likelihood * prior\n\n"
+                "  P(x|z) = P(z|x) * P(x) / P(z)\n"
+                "  posterior = likelihood * prior / evidence\n\n"
+                "Since P(z) is a normalization constant (independent of x), we write:\n"
+                "  P(x|z) is proportional to P(z|x) * P(x)\n\n"
                 "When multiplying two Gaussians, the result is another Gaussian "
                 "whose mean and covariance can be computed analytically.\n\n"
                 "The Kalman Gain K determines how much we 'trust' the measurement "
