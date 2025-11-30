@@ -60,6 +60,9 @@ bool matricesEqual(const Eigen::MatrixXd& a, const Eigen::MatrixXd& b, double to
     return (a - b).norm() < tolerance;
 }
 
+// Random seed for reproducible simulation results
+constexpr unsigned int RANDOM_SEED = 42;
+
 /**
  * @class KalmanFilterDemo
  * @brief Main window for the Kalman Filter demonstration using pure Qt
@@ -274,7 +277,7 @@ private slots:
         Eigen::VectorXd x_true(state_dim);
         x_true << 0.0, 1.0;
 
-        std::mt19937 rng(42);
+        std::mt19937 rng(RANDOM_SEED);
         std::normal_distribution<double> meas_noise(0.0, std::sqrt(r));
 
         const int num_steps = 10;
