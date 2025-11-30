@@ -23,6 +23,8 @@ _codeql_detected_source_root
 *.out
 *.app
 kalman_demo
+ekf_ukf_demo
+quaternion_demo
 
 # CMake generated files
 CMakeCache.txt

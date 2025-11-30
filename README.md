@@ -1,12 +1,18 @@
 # kalman_foundations
 
-A comprehensive implementation of the Kalman Filter exploring its four distinct mathematical origins: Bayesian probability, Geometric projection, Statistical estimation, and Control theoretic optimal observation.
+A comprehensive implementation of the Kalman Filter family exploring its mathematical foundations, from linear to nonlinear systems, including quaternion-based orientation estimation.
 
 ## Overview
 
-This repository demonstrates that the Linear Kalman Filter can be derived from four completely different mathematical perspectives, yet all four derivations converge to exactly the same numerical results. This unity across disparate fields of mathematics is one of the beautiful aspects of optimal estimation theory.
+This repository demonstrates:
+1. **Linear Kalman Filter** - Four mathematical perspectives that all produce identical results
+2. **Extended Kalman Filter (EKF)** - For nonlinear systems using linearization
+3. **Unscented Kalman Filter (UKF)** - For nonlinear systems using sigma points
+4. **Quaternion EKF/UKF** - For 3D orientation estimation (IMU/AHRS applications)
 
-## Mathematical Perspectives
+## Linear Kalman Filter - Four Mathematical Perspectives
+
+The Linear Kalman Filter can be derived from four completely different mathematical perspectives, yet all four derivations converge to exactly the same numerical results.
 
 ### 1. Bayesian (`src/bayesian/`)
 - **Perspective:** Probability Density Functions
@@ -27,6 +33,56 @@ This repository demonstrates that the Linear Kalman Filter can be derived from f
 - **Perspective:** Control Theory and State Observer Design
 - **Key Insight:** The Kalman gain is the optimal observer gain from the Riccati equation
 - **Terminology:** Error Dynamics, Feedback Gain K, Stability, Riccati Equation
+
+## Nonlinear Kalman Filters
+
+### Extended Kalman Filter (`src/ekf/`)
+The EKF handles nonlinear systems by linearizing the dynamics and measurement functions using Jacobians.
+
+**Key Features:**
+- First-order Taylor series approximation
+- Requires analytical Jacobian computation
+- Computationally efficient
+- Best for mildly nonlinear systems
+
+**Example:** Nonlinear pendulum tracking with damping
+
+### Unscented Kalman Filter (`src/ukf/`)
+The UKF uses sigma points to capture the probability distribution without linearization.
+
+**Key Features:**
+- No Jacobian computation required
+- Captures mean and covariance to 3rd order accuracy
+- Better for highly nonlinear systems
+- Slightly more computationally expensive than EKF
+
+**Example:** Same pendulum problem - compare accuracy vs EKF
+
+## Quaternion-Based Orientation Estimation
+
+### Quaternion EKF (`src/quaternion_ekf/`)
+Extended Kalman Filter for 3D orientation estimation using quaternions.
+
+**Key Features:**
+- Avoids gimbal lock (unlike Euler angles)
+- Proper quaternion normalization constraint handling
+- Fuses gyroscope, accelerometer, and magnetometer
+- Used in AHRS (Attitude and Heading Reference Systems)
+
+### Quaternion UKF (`src/quaternion_ukf/`)
+Unscented Kalman Filter for 3D orientation with proper quaternion manifold handling.
+
+**Key Features:**
+- Sigma points generated on quaternion manifold
+- Quaternion mean via iterative averaging
+- Error-state formulation for numerical stability
+- Superior accuracy for aggressive maneuvers
+
+**Applications:**
+- IMU sensor fusion
+- Drone/robot orientation tracking
+- Spacecraft attitude estimation
+- VR/AR head tracking
 
 ## Requirements
 
@@ -54,53 +110,84 @@ cmake ..
 make
 ```
 
-## Running the Demo
+## Running the Demos
 
-The demo runs a 1D constant velocity tracking simulation through all four implementations:
-
+### 1. Linear Kalman Filter Demo
+Runs a 1D constant velocity tracking simulation through all four mathematical perspectives:
 ```bash
 ./build/kalman_demo
 ```
+Expected output shows all four implementations produce **identical floating-point results**.
 
-Expected output will show that all four implementations produce **identical floating-point results** at each time step.
+### 2. EKF vs UKF Demo
+Compares EKF and UKF on a nonlinear pendulum tracking problem:
+```bash
+./build/ekf_ukf_demo
+```
+Both filters track the nonlinear system effectively.
+
+### 3. Quaternion EKF/UKF Demo
+Simulates 3D orientation estimation using IMU sensor fusion:
+```bash
+./build/quaternion_demo
+```
+Demonstrates quaternion-based AHRS with gyroscope, accelerometer, and magnetometer fusion.
 
 ## Project Structure
 
 ```
 kalman_foundations/
-├── CMakeLists.txt              # Build configuration
-├── README.md                   # This file
-├── .gitignore                  # Git ignore patterns
+├── CMakeLists.txt                    # Build configuration
+├── README.md                         # This file
+├── .gitignore                        # Git ignore patterns
 └── src/
-    ├── main.cpp                # Demo: 1D constant velocity tracking
+    ├── main.cpp                      # Linear KF demo
+    ├── ekf_ukf_demo.cpp              # EKF vs UKF comparison demo
+    ├── quaternion_demo.cpp           # Quaternion filter demo
     ├── bayesian/
-    │   └── KalmanFilter.hpp    # Bayesian perspective implementation
+    │   └── KalmanFilter.hpp          # Bayesian perspective
     ├── geometric/
-    │   └── KalmanFilter.hpp    # Geometric perspective implementation
+    │   └── KalmanFilter.hpp          # Geometric perspective
     ├── statistical/
-    │   └── KalmanFilter.hpp    # Statistical perspective implementation
-    └── optimal_observer/
-        └── KalmanFilter.hpp    # Control theory perspective implementation
+    │   └── KalmanFilter.hpp          # Statistical perspective
+    ├── optimal_observer/
+    │   └── KalmanFilter.hpp          # Control theory perspective
+    ├── ekf/
+    │   └── ExtendedKalmanFilter.hpp  # Extended Kalman Filter
+    ├── ukf/
+    │   └── UnscentedKalmanFilter.hpp # Unscented Kalman Filter
+    ├── quaternion_ekf/
+    │   └── QuaternionEKF.hpp         # Quaternion EKF
+    └── quaternion_ukf/
+        └── QuaternionUKF.hpp         # Quaternion UKF
 ```
 
-## The Constant Velocity Model
+## Mathematical Details
 
-The demo implements a 1D constant velocity tracking problem:
+### The Pendulum Model (EKF/UKF)
 
-**State vector:** `x = [position, velocity]ᵀ`
+**State vector:** `x = [θ, θ̇]ᵀ` (angle and angular velocity)
 
-**Dynamics:**
+**Nonlinear Dynamics:**
 ```
-x[k+1] = F · x[k] + w[k]
-F = [1  dt]
-    [0   1]
+θ̈ = -(g/L)·sin(θ) - b·θ̇
 ```
+where g=9.81 m/s², L=1.0 m, b=0.1 (damping)
 
-**Measurement:**
+### The Quaternion Model (3D Orientation)
+
+**State vector:** `x = [qw, qx, qy, qz, ωx, ωy, ωz]ᵀ`
+
+**Quaternion Kinematics:**
 ```
-z[k] = H · x[k] + v[k]
-H = [1  0]  (observe position only)
+q̇ = 0.5 · q ⊗ [0, ω]
 ```
+where ⊗ is quaternion multiplication
+
+**Measurements:**
+- Accelerometer: Gravity vector in body frame → Roll/Pitch correction
+- Magnetometer: Magnetic field in body frame → Yaw/Heading correction
+- Gyroscope: Angular velocity → Orientation integration
 
 ## License
 
