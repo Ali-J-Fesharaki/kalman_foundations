@@ -33,12 +33,13 @@ This repository demonstrates that the Linear Kalman Filter can be derived from f
 - **C++17** compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
 - **CMake** 3.14 or higher
 - **Eigen3** linear algebra library
+- **Qt6** (Widgets, Charts) for the GUI
 
 ### Installing Dependencies (Ubuntu/Debian)
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y cmake libeigen3-dev
+sudo apt-get install -y cmake libeigen3-dev qt6-base-dev qt6-charts-dev
 ```
 
 ## Building
@@ -56,23 +57,28 @@ make
 
 ## Running the Demo
 
-The demo runs a 1D constant velocity tracking simulation through all four implementations:
+The demo runs a 1D constant velocity tracking simulation through all four implementations with a pure Qt GUI:
 
 ```bash
 ./build/kalman_demo
 ```
 
-Expected output will show that all four implementations produce **identical floating-point results** at each time step.
+The GUI displays:
+- **Chart View**: Visualizes ground truth, measurements, and all four filter estimates
+- **Simulation Log**: Shows step-by-step results and verification
+- **Interactive Controls**: Run Simulation and Clear buttons
+
+All four implementations produce **identical floating-point results** at each time step, demonstrating the mathematical equivalence of all four derivations.
 
 ## Project Structure
 
 ```
 kalman_foundations/
-├── CMakeLists.txt              # Build configuration
+├── CMakeLists.txt              # Build configuration (Qt6 + Eigen3)
 ├── README.md                   # This file
 ├── .gitignore                  # Git ignore patterns
 └── src/
-    ├── main.cpp                # Demo: 1D constant velocity tracking
+    ├── main.cpp                # Qt GUI demo: 1D constant velocity tracking
     ├── bayesian/
     │   └── KalmanFilter.hpp    # Bayesian perspective implementation
     ├── geometric/
