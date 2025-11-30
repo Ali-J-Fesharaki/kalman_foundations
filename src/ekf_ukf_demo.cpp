@@ -18,6 +18,11 @@
 #include <vector>
 
 #include "ekf/ExtendedKalmanFilter.hpp"
+
+// Define PI for portability (not guaranteed in all compilers)
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include "ukf/UnscentedKalmanFilter.hpp"
 
 int main()

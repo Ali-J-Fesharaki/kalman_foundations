@@ -31,6 +31,11 @@
 #include <Eigen/Dense>
 #include <cmath>
 
+// Define PI for portability (not guaranteed in all compilers)
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace quaternion_ekf {
 
 /**

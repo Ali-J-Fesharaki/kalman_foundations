@@ -15,9 +15,15 @@
 #include <iomanip>
 #include <cmath>
 #include <random>
+#include <algorithm>
 
 #include "quaternion_ekf/QuaternionEKF.hpp"
 #include "quaternion_ukf/QuaternionUKF.hpp"
+
+// Define PI for portability (not guaranteed in all compilers)
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 /**
  * @brief Convert degrees to radians
